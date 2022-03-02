@@ -20,6 +20,9 @@ app.all('*',function (req, res, next) {
 const publicRouter = require('./routes/public');
 const authenticatedRouter = require('./routes/authenticated');
 
+app.get('/game.html', (req, res)=>{
+  res.sendFile(path.join(__dirname, './Build/index.html'));
+})
 
 app.use(logger('dev'));
 app.use(express.json());

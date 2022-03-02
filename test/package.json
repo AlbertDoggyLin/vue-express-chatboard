@@ -13,7 +13,8 @@
     "core-js": "^3.6.5",
     "cors": "^2.8.5",
     "vue": "^3.0.0",
-    "vue-router": "^4.0.12"
+    "vue-router": "^4.0.12",
+    "vue-unity-webgl": "^1.2.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
