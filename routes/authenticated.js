@@ -72,8 +72,10 @@ router.post('/register', async(req, res)=>{
     const {userName, password}=req.body;
     const cursorValues = await userCollection.find({userName}).toArray();
     if(cursorValues.length!==0)res.send({status:'user name repeated'});
-    await userCollection.insertOne({userName, password});
-    res.send({status:'login'})
+    else{
+      await userCollection.insertOne({userName, password});
+      res.send({status:'login'})
+    }
   }
   catch(e){console.log(e)}
   finally{

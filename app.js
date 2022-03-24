@@ -31,16 +31,16 @@ app.use(cookieParser());
 
 app.use('/api/public', publicRouter);
 app.use('/api/authenticated', authenticatedRouter);
-// const history = require('connect-history-api-fallback');
-// app.use(express.static(path.join(__dirname, './dist')));
-// app.get('/', function(req, res, next){
-//     res.sendFile(__dirname+'/dist/index.html');
-// });
-// app.use(history());
-// // catch 404 and forward to error handler
-// app.use(function(req, res, next) {
-//   next(createError(404));
-// });
+const history = require('connect-history-api-fallback');
+app.use(express.static(path.join(__dirname, './dist')));
+app.get('/', function(req, res, next){
+    res.sendFile(__dirname+'/dist/index.html');
+});
+app.use(history());
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
 
 // // error handler
 // app.use(function(err, req, res, next) {

@@ -27,7 +27,7 @@ const checkLogin=async()=>{
 const logout = async() => {
   try{
     const fetchResult=await fetch('api/authenticated/logout');
-    if('logout sucess'===await fetchResult.json()){
+    if('logout sucess'===(await fetchResult.json()).status){
       isLogin.value=false;
     }
   }catch(e){
