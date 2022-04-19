@@ -6,31 +6,30 @@
 
 <script>
 import card from './card.vue'
-import {ref, watchEffect, inject} from 'vue'
-import store from '../store'
-const content=ref([]);
 export default {
   name: 'home',
-  props:['contentCode'],
+  props:['userName', 'isLogin'],
   components:{
     card
   },
-  setup(){
-    const userName=inject(store.userName);
-    const isLogin=inject(store.isLogin);
-    const isAuthor=(author)=>{
-      if(isLogin.value && userName.value===author)return true;
+  data(){
+    return {content:[]}
+  },
+  methods:{
+    isAuthor:function(author){
+      if(this.isLogin && this.userName===author)return true;
       return false
     }
-    watchEffect(async()=>{
-      const tempResult = await (await fetch('api/public')).json();
-      if(tempResult.status === "fetch successful"){
-        content.value = tempResult.data
-      }
-    })
-    return {
-      content,
-      isAuthor
+  },
+  watch:{
+    content:{
+      handler:async function(){
+        const tempResult = await (await fetch('api/public')).json();
+        if(tempResult.status === "fetch successful"){
+          this.content = tempResult.data
+        }
+      },
+      immediate:true
     }
   }
 }

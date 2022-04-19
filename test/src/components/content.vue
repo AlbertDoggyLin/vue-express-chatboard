@@ -66,20 +66,20 @@
 </template>
 
 <script>
-import { inject, ref, watchEffect } from 'vue'
-import store from '../store'
-const fetchedData=ref({});
-const ready=ref(false);
-const comment=ref('');
 export default {
-    props:['contentCode'],
-    setup(props){
-        const userName=inject(store.userName);
-        const isLogin=inject(store.isLogin);
-        const isAuthor=function(name){return isLogin&&name===userName.value}
-        const deleteComment=async(index)=>{
+    props:['contentCode','userName', 'isLogin'],
+    data(){
+        return {
+            ready:false,
+            comment:'',
+            fetchedData:{}
+        }
+    },
+    methods:{
+        isAuthor(name){return this.isLogin&&name===this.userName},
+        deleteComment:async(index)=>{
             const deleteResponse = await (await fetch('api/authenticated/comment', {
-                body: JSON.stringify({_id:props.contentCode, index}), // must match 'Content-Type' header
+                body: JSON.stringify({_id:this.contentCode, index}), // must match 'Content-Type' header
                 cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
                 credentials: 'same-origin', // include, same-origin, *omit
                 headers: {
@@ -92,13 +92,13 @@ export default {
                 referrer: 'no-referrer', // *client, no-referrer
             })).json();
             if(deleteResponse.status==="successcully delete comment"){
-                const discussion = fetchedData.value.discussion;
+                const discussion = this.fetchedData.discussion;
                 discussion.splice(discussion.indexOf(discussion.find(e=>e._id===index)), 1);
             }
-        }
-        const submitComment=async ()=>{
+        },
+        submitComment:async  function(){
             const commentResponseJson = await (await fetch('api/authenticated/comment', {
-                body: JSON.stringify({_id:props.contentCode, content:comment.value}), // must match 'Content-Type' header
+                body: JSON.stringify({_id:this.contentCode, content:this.comment}), // must match 'Content-Type' header
                 cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
                 credentials: 'same-origin', // include, same-origin, *omit
                 headers: {
@@ -111,37 +111,33 @@ export default {
                 referrer: 'no-referrer', // *client, no-referrer
             })).json()
             if(commentResponseJson.status==="comment successful"){
-                fetchedData.value.discussion.push({userName, content:comment.value, _id:commentResponseJson._id})
-                comment.value='';
+                this.fetchedData.discussion.push({userName:this.userName, content:this.comment, _id:commentResponseJson._id})
+                this.comment='';
             }
         }
-        watchEffect(async()=>{
-            fetchedData.value = await (await fetch('api/public/', {
-                body: JSON.stringify({_id:props.contentCode}), // must match 'Content-Type' header
-                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-                credentials: 'same-origin', // include, same-origin, *omit
-                headers: {
-                'user-agent': 'Mozilla/4.0 MDN Example',
-                'content-type': 'application/json'
-                },
-                method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                mode: 'cors', // no-cors, cors, *same-origin
-                redirect: 'follow', // manual, *follow, error
-                referrer: 'no-referrer', // *client, no-referrer
-            })).json()
-            if(fetchedData.value.status === "fetch successful"){
-                fetchedData.value=fetchedData.value.article;
-                ready.value=true;
-            }
-        })
-        return {
-            fetchedData,
-            ready,
-            comment,
-            isLogin,
-            submitComment,
-            deleteComment,
-            isAuthor
+    },
+    watch:{
+        fetchedData:{
+            handler:async function(){
+                this.fetchedData = await (await fetch('api/public/', {
+                    body: JSON.stringify({_id:this.contentCode}), // must match 'Content-Type' header
+                    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                    credentials: 'same-origin', // include, same-origin, *omit
+                    headers: {
+                    'user-agent': 'Mozilla/4.0 MDN Example',
+                    'content-type': 'application/json'
+                    },
+                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    mode: 'cors', // no-cors, cors, *same-origin
+                    redirect: 'follow', // manual, *follow, error
+                    referrer: 'no-referrer', // *client, no-referrer
+                })).json()
+                if(this.fetchedData.status === "fetch successful"){
+                    this.fetchedData=this.fetchedData.article;
+                    this.ready=true;
+                }
+            },
+            immediate:true
         }
     }
 }

@@ -1,52 +1,46 @@
 <template>
-  <navbar @logout="logout"></navbar>
+  <navbar :isLogin='isLogin' @logout="logout"></navbar>
   <div class = "container">
-    <router-view @login="checkLogin"></router-view>
+    <router-view @login="checkLogin" :isLogin='isLogin' :userName="userName"></router-view>
   </div>
 </template>
 
 <script>
 import Navbar from './components/NavBar.vue'
-import {ref, provide, computed, onMounted} from 'vue';
-import store from "./store"
-const isLogin=ref(false);
-const userName=ref('');
-const isLoginComputed=computed(()=>isLogin);
-const userNameComputed=computed(()=>userName);
-const checkLogin=async()=>{
-  try{
-    const fetchResult=await fetch('api/authenticated');
-    const fetchedJson=await fetchResult.json();
-    isLogin.value='login by session'=== fetchedJson.status;
-    userName.value=fetchedJson.userName;
-  }catch(e){
-    console.log(e);
-  }
-}
-//import axios from 'axios';
-const logout = async() => {
-  try{
-    const fetchResult=await fetch('api/authenticated/logout');
-    if('logout sucess'===(await fetchResult.json()).status){
-      isLogin.value=false;
-    }
-  }catch(e){
-    console.log(e);
-  }
-}
 export default{
   name:"app",
   components:{
     Navbar
   },
-  setup(){
-    provide(store.isLogin, isLoginComputed.value);
-    provide(store.userName, userNameComputed.value);
-    onMounted(checkLogin);
-    return {
-      logout,
-      checkLogin
+  data(){
+    return {isLogin:false,userName:''}
+  },
+  methods:{
+    logout:async() => {
+      try{
+        const fetchResult=await fetch('api/authenticated/logout');
+        if('logout sucess'===(await fetchResult.json()).status){
+          this.isLogin=false;
+        }
+      }catch(e){
+        console.log(e);
+      }
+    },
+    checkLogin:async function(){
+      try{
+        const fetchResult=await fetch('api/authenticated');
+        const fetchedJson=await fetchResult.json();
+        this.isLogin='login by session'=== fetchedJson.status;
+        this.userName=fetchedJson.userName;
+      }catch(e){
+        console.log(e);
+      }
     }
+  },
+  mounted(){
+    try{
+      this.checkLogin();
+    }catch(e){console.log(e)}
   }
 }
 </script>

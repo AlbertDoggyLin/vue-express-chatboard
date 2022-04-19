@@ -13,26 +13,30 @@
 </template>
 
 <script>
-import {inject, ref, watchEffect} from 'vue';
-import store from '../store';
-import { useRouter } from 'vue-router';
-const content=ref('');
-const title=ref('');
 export default {
-    setup(){
-        const isLogin=inject(store.isLogin);
-        const router=useRouter();
-        watchEffect(()=>{
-            setTimeout(() => {
-                if(!isLogin.value){
-                    alert('isLogin==false')
-                    router.push('/')
-                }
-            }, 100);
-        }) 
-        const submit=async()=>{
+    props:["isLogin"],
+    data(){
+        return {
+            content:'',title:''
+        }
+    },
+    watch:{
+        isLogin:{
+            handler:function(){
+                setTimeout(() => {
+                    if(!this.isLogin){
+                        alert('isLogin==false')
+                        this.$router.push('/')
+                    }
+                }, 100);
+            },
+            immediate:true
+        }
+    },
+    methods:{
+        submit:async function(){
             const postResult = await (await fetch('api/authenticated/post', {
-                body: JSON.stringify({title:title.value, content:content.value}), // must match 'Content-Type' header
+                body: JSON.stringify({title:this.title, content:this.content}), // must match 'Content-Type' header
                 cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
                 credentials: 'same-origin', // include, same-origin, *omit
                 headers: {
@@ -46,15 +50,12 @@ export default {
             })).json();
             if(postResult.status==="not login yet"){
                 console.log('not login yet');
-                router.push('/')
+                this.$router.push('/')
             }
             else{
                 console.log('success');
-                router.push('/')
+                this.$router.push('/')
             }
-        }
-        return {
-            content, title, submit
         }
     }
 }

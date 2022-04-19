@@ -70,48 +70,40 @@
 </template>
 
 <script>
-import store from '../store'
-import {inject, watchEffect, ref} from 'vue'
-import {useRouter} from 'vue-router'
-const userName=ref('');
-const password=ref('');
-const remember=ref(false);
-const repeatedPassword=ref('');
 export default {
-    setup(props, {emit}){
-        const isLogin=inject(store.isLogin);
-        const router=useRouter();
-        const register=async()=>{
-          if(password.value!==repeatedPassword.value)return;
-          const postResult=await fetch('api/authenticated/register', {
-              body: JSON.stringify({userName:userName.value, password:password.value, remember:remember}), // must match 'Content-Type' header
-              cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-              credentials: 'same-origin', // include, same-origin, *omit
-              headers: {
-              'user-agent': 'Mozilla/4.0 MDN Example',
-              'content-type': 'application/json'
-              },
-              method: 'POST', // *GET, POST, PUT, DELETE, etc.
-              mode: 'cors', // no-cors, cors, *same-origin
-              redirect: 'follow', // manual, *follow, error
-              referrer: 'no-referrer', // *client, no-referrer
-          });
-          const status=(await postResult.json()).status;
-          if(status==='login')emit('login');
-        }
-        watchEffect(()=>{
-            if(isLogin.value){
-                router.push('/');
-            }
-        })
-        return {
-            register,
-            userName,
-            password,
-            remember,
-            repeatedPassword
+  props:["isLogin"],
+  data(){
+    return {userName:'',password:'',remember:false,repeatedPassword:''}
+  },
+  methods:{
+    register:async function(){
+      if(this.password!==this.repeatedpassword)return;
+      const postResult=await fetch('api/authenticated/register', {
+          body: JSON.stringify({userName:this.userName, password:this.password, remember:this.remember}), // must match 'Content-Type' header
+          cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+          credentials: 'same-origin', // include, same-origin, *omit
+          headers: {
+          'user-agent': 'Mozilla/4.0 MDN Example',
+          'content-type': 'application/json'
+          },
+          method: 'POST', // *GET, POST, PUT, DELETE, etc.
+          mode: 'cors', // no-cors, cors, *same-origin
+          redirect: 'follow', // manual, *follow, error
+          referrer: 'no-referrer', // *client, no-referrer
+      });
+      const status=(await postResult.json()).status;
+      if(status==='login')this.$emit('login');
+    }
+  },
+  watch:{
+    isLogin:{
+      handler:function(){
+          if(this.isLogin){
+              this.$router.push('/');
+          }
         }
     }
+  }
 }
 </script>
 

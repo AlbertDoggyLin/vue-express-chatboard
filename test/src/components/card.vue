@@ -14,16 +14,16 @@
 </template>
 
 <script>
-const filter=(origin)=>{
-  if(origin.length>=20)return origin.slice(0,17)+"..."
-  else return origin
-}
 export default {
     props:['isAuthor', 'title', 'content', '_id'],
-    setup(props, {emit}){
-      const deleteArticle = async()=>{
+    methods:{
+      filter:(origin)=>{
+        if(origin.length>=20)return origin.slice(0,17)+"..."
+        else return origin
+      },
+      deleteArticle:async function(){
         const result = await (await fetch('/api/authenticated/article', {
-              body: JSON.stringify({_id:props._id}), // must match 'Content-Type' header
+              body: JSON.stringify({_id:this._id}), // must match 'Content-Type' header
               cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
               credentials: 'same-origin', // include, same-origin, *omit
               headers: {
@@ -35,10 +35,8 @@ export default {
               redirect: 'follow', // manual, *follow, error
               referrer: 'no-referrer', // *client, no-referrer
         })).json()
-        if(result.status==="successcully delete article")emit('deleted');
+        if(result.status==="successcully delete article")this.$emit('deleted');
       }
-
-      return {filter, deleteArticle}
     }
 }
 </script>

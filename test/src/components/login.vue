@@ -21,23 +21,26 @@
 </template>
 
 <script>
-import{inject, ref, watchEffect} from 'vue';
-import { useRouter } from "vue-router";
-import store from '../store'
-const userName=ref('')
-const password=ref('')
-const remember=ref(false)
 export default {
-    setup(porps, {emit}){
-        const router=useRouter();
-        const isLogin=inject(store.isLogin);
-        watchEffect(()=>{
-            if(isLogin.value)router.push('/');
-        })
-        const loginClicked=async ()=>{
+    props:["isLogin"],
+    data(){
+        return {
+            userName:'',password:'',remember:false
+        }
+    },
+    watch:{
+        isLogin:{
+            handler:function(){
+                if(this.isLogin)this.$router.push('/');
+            },
+            immediate:true
+        }
+    },
+    methods:{
+        loginClicked:async function(){
             try{
                 const fetchResult=await fetch('api/authenticated/login', {
-                        body: JSON.stringify({userName:userName.value, password:password.value, remember:remember.value}), // must match 'Content-Type' header
+                        body: JSON.stringify({userName:this.userName, password:this.password, remember:this.remember}), // must match 'Content-Type' header
                         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
                         credentials: 'same-origin', // include, same-origin, *omit
                         headers: {
@@ -52,18 +55,12 @@ export default {
                 );
                 const status=(await fetchResult.json()).status
                 if('login'===status){
-                    router.push('/');
-                    emit('login')
+                    this.$router.push('/');
+                    this.$emit('login')
                 }
             }catch(e){
                 console.log(e);
             }
-        }
-        return {
-            loginClicked,
-            password,
-            remember,
-            userName
         }
     }
 }
